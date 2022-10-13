@@ -19,7 +19,12 @@ fetch("http://localhost:3000/api/products")
   console.table(products);
 });
 
-// fonction d'affichage des produits de l'API sur la page index, appelée plus haut :
+
+/**
+ * Fonction d'affichage des produits de l'API sur la page index, appelée plus haut
+ * 
+ * @param {Array} products 
+ */
 function displayAllProducts(products) { 
   for (let i in products) {
 

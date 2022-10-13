@@ -11,7 +11,11 @@ const product = {
         mode: 'cors', //échange interdomaines
         cache: 'no-cache'
     },
-    // Déclaration de la fonction getCart
+    
+    /**
+     * Déclaration de la fonction getCart
+     * @returns Array | JSON
+     */
     getCart: function() {
         // localStorage.getItem permet de récupérer une donnée stockée en lien avec la clé 'cart' du local storage.
         let cart = localStorage.getItem('cart');
@@ -80,7 +84,7 @@ const product = {
             console.log(objectProduct);
             //et de récupérer les informations contenues dans l'objet au format json oneProduct et de faire appel à la fonction définie plus bas qui va afficher les détails de l'objet "OneProduct" : 
             //Etape 6 : cette partie permet d'insérer les détails du produit dans la page produit.
-            typeof(objectProduct); // on voit ainsi qu'il s'agit d'un objet.
+            console.log((typeof(objectProduct))); // on voit ainsi qu'il s'agit d'un objet.
             let imageInfo = document.querySelector(".item__img");
             let imageElement = document.createElement("img");
             imageElement.src = objectProduct.imageUrl;
@@ -88,19 +92,19 @@ const product = {
             imageInfo.appendChild(imageElement);
             
             let title = document.querySelector("#title");
-            title.textContent = `${objectProduct.name}`;
+            title.textContent = objectProduct.name;
             
             let price = document.querySelector("#price");
-            price.textContent = `${objectProduct.price}`;
+            price.textContent = objectProduct.price;
             
             let description = document.querySelector("#description");
-            description.textContent = `${objectProduct.description}`;
+            description.textContent = objectProduct.description;
             
             let colorOption = document.querySelector("#colors");
 
             // On boucle sur l'array colors (récupéré de l'API car nous voyons sur http://localhost:3000/API/products/a557292fe5814ea2b15c6ef4bd73ed83 qu'il s'agit d'un array) pour créer pour chaque valeur de l'array une balise <option> 
             for (const color of objectProduct.colors) { // pour chacune des lignes/valeur que l'on nomme "color" dans l'array "colors" dans l'API : on crée une balise <option> dans le DOM qu'on stocke dans une variable "optionElement" :
-                const optionElement = document.createElement('option');
+                const optionElement = document.createElement("option");
                 // On ajoute à chaque balise <option> l'attribue "value" auquel on affecte la valeur de chaque ligne de l'array nommée "color"
                 optionElement.value = color; 
                 // pour chacune des lignes ou valeur étant une couleur et nommée donc color : on attribue cette valeur au "textcontent" de chacune des balises <option> pour que les couleurs s'affichent
@@ -138,7 +142,7 @@ const product = {
 
         // On récupère le contenu du panier : le résultat de la fonction getcart est stockée dans la variable cartContent qui est un array.
         const cartContent = product.getCart();
-        // console.log(cartContent);
+        console.log(cartContent);
 
         // On utilise la fonction native JS find() pour savoir si le même produit est déjà dans le panier
         // tu vas chercher dans le panier cartContent si tu trouves un produit p dont l'id correspond à l'id du nouveau produit à rajouter
@@ -156,6 +160,7 @@ const product = {
             // Si le panier contient bien un produit p dont la couleur maintenant correspond à la couleur du nouveau produit à rajouter (n'est pas undefined) 
             // Si on a donc trouvé un produit correspondant exactement (id + couleur) 
             if (foundProductByColor != undefined) {
+                console.log("foundProductByColor ok");
                 //=> on met à jour la quantité
                 // Pour pouvoir tenir compte de la quantité réellement saisie par l'utilisateur, on convertit les valeurs des quantités en entier (fonction parseInt)
                 //transformer en entier la quantité de l'article similaire en couleur trouvé dans le panier.
@@ -172,8 +177,8 @@ const product = {
             // On ne trouve pas de produit correspondant dans le panier => on l'ajoute au panier
             cartContent.push(newProduct);
         }
-        // On vérifie que la quantité et la couleur ne sont pas nulles
-        if (document.querySelector('#quantity').value !=0 && document.querySelector('#quantity').value <101 && document.querySelector('#colors').value !=0) {
+        // On vérifie que la quantité et la couleur ne sont pas nulles et que la quantité ne peut pas être supérieure à 100
+        if (document.querySelector('#quantity').value !=0 && document.querySelector('#quantity').value <101 && document.querySelector('#colors').value !='') {
             // On stocke le panier dans le localStorage
             product.saveCart(cartContent);
             alert('Produit ajouté au panier !');
