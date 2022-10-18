@@ -1,9 +1,9 @@
-// Script JS pour afficher tous les produits retournés par l'API (Etape 3) et faire le lien entre la page accueil et la page produit (début de l'étape 4):
+// Script JS pour afficher tous les produits retournés par l'API (étape 3) et faire le lien entre la page accueil et la page produit (étape 4):
 
-//ETAPE 3 : Insérer les produits dans la page d'accueil : 
+//ETAPE 3 : Nous insérons les produits dans la page d'accueil : 
 
 /**
- * Appel de l'API pour récupérer et afficher tous les produits disponibles : avec la méthode GET puis avec l'appel de la fonction définie plus bas "displayAllProducts(products)";
+ * Appel de l'API pour récupérer et afficher tous les produits disponibles : avec la méthode "GET" puis avec l'appel de la fonction définie plus bas "displayAllProducts(products)";
  */
 fetch("http://localhost:3000/api/products")
 .then(function(response) {
@@ -22,16 +22,17 @@ fetch("http://localhost:3000/api/products")
 });
 
 /**
- * Fonction d'insertion des produits de l'API dans le DOM de manière dynamique et donc d'affichage des produits sur la page index et qui permet également de faire le lien entre la page accueil et la page produit
+ * Nous insérons les produits fournis par l'API dans le DOM de manière dynamique et affichons donc les produits sur la page Index. Nous faisons également le lien entre la page accueil et la page produit.
  * 
  * @param {Array} products 
  * @return void
  */
 function displayAllProducts(products) { 
-  // grâce à une boucle pour parcourir la réponse :
+  // Grâce à une boucle pour parcourir la réponse retournée par l'API :
   for (let i in products) {
+    // Nous rattachons dynamiquement à l'élément parent qui a la classe "items" dans la page "Index" les balises que nous créons avec leur contenu et leurs attributs.
     const allProductsDisplay = document.querySelector(".items"); 
-    //Début de l'Etape 4 : faire le lien entre la page d'accueil et la page produit : paramétrage de la balise “a” et son attribut “href 
+    //Etape 4 : nous faisons le lien entre la page d'accueil et la page produit via le paramétrage de la balise “a” et son attribut “href.
     const OneProductLinkDisplay = document.createElement("a");
     OneProductLinkDisplay.href += "./product.html?id=" + products[i]._id;
   

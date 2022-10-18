@@ -1,6 +1,8 @@
-//  ETAPE 8 : Afficher un tableau récap des achats dans la page panier
-const cart = {
+// cart.js pour afficher les produits du panier sur la page cart et permettre à l'utilisateur de modifier les quantités, supprimer des articles et commander les produits en remplissant le formulaire (étapes 8 à 11).
 
+// Création d'un module "cart" avec ses méthodes et ses propriétés
+const cart = {
+    // Configuration du Fetch qui va être utilisé dans la fonction getProduct(idProduct, index).
     // URL de l'API
     apiUrl: 'http://localhost:3000/api/products/',
 
@@ -11,79 +13,77 @@ const cart = {
         cache: 'no-cache'
     },
 
-    // On initialise le nb total d'articles et le prix total à afficher sur la page panier (variables utilisées dans la fonction buildHtmlArticle())
+    // Nous initialisons le nb total d'articles et le prix total à afficher sur la page panier : variables utilisées dans la fonction "buildHtmlArticle(product, index).
     nbArticles: 0,
     totalPrice: 0,
 
-
     /**
-     * Récupère le contenu du panier (via localStorage) pour insérer les produits dans le DOM
+     * Etape 8 : nous affichons le contenu du panier via l'insersion des produits récupérés du localStorage dans le DOM.
      */
     displayCart: function() {
-        // On recharge la page pour rafraichir le contenu du panier (nécessaire si on a supprimé / ajouté plusieurs produits)
-        if (!localStorage.getItem('firstLoad')) { // on sait qu'il n'y a rien à firstload la 1ere fois, on le l'a jamais créee, de ce fait quand on arrive sur la page panier on force le rafraichissement. 
+        // Nous raffraichissons le contenu du panier de la page "cart" alors que celle-ci est ouverte  
+        if (!localStorage.getItem("firstLoad")) {  
             setTimeout(() => {
                 window.location.reload();
             }, '100');
-            localStorage.setItem('firstLoad', true); // et on indique la valeur true.
+            localStorage.setItem("firstLoad", true); 
         } else {
-            localStorage.removeItem('firstLoad'); 
+            localStorage.removeItem("firstLoad"); 
         }
-
-        // On récupère le contenu du panier sous la forme d'un array contenant les objets produits avec les les clés : id, color, quantity
-        const cartRetrieved = localStorage.getItem('cart');
+        // Nous récupérons le contenu du panier à la clé "cart"
+        const cartRetrieved = localStorage.getItem("cart");
         //console.log(cartRetrieved);
-
-        // Si le panier contient au moins 1 produit, alors on fait le traitement pour son affichage
+        // Si le panier contient au moins 1 produit, nous réalisons le traitement pour son affichage
         if (cartRetrieved !== '[]') {
             const cartContent = JSON.parse(cartRetrieved);
-            // On boucle sur le panier pour lire et récupérer chaque ligne (c.a.d id produit, couleur et quantité de chaque objet produit)
-            // for (const product of cartContent) {
-            for (let index = 0; index < cartContent.length; index++) { // tant que l'index est inférieur à la longueur du tableau
-                // On va construire dynamiquement le tableau des produits contenus dans le panier
+            // Nous parcourons le panier (Array)
+            // for (const product of cartContent) { possible aussi
+            for (let index = 0; index < cartContent.length; index++) { 
+                //Nous appelons la fonction ci-dessous qui va afficher dynamiquement via le DOM les données récupérées.
                 cart.buildHTMLArticle(cartContent[index], index);
             }
-        } else { // Si le panier est vide ; on modifie le texte du h1 pour le préciser
+        } else { 
+            // Si le panier est vide nous l'affichons.
             const h1Element = document.querySelector('h1');
             h1Element.textContent = 'Votre panier est vide';
         }
     },
+
     /**
+     * Suite de l'étape 8
+     * Nous insérons les informations sur les produits issues du panier : via le DOM et les affichons.
+     * Nous rajoutons les informations manquantes qui ne sont pas dans le panier en faisant une requête auprès de l'API.
+     * Lorsque la fonction est appelée par la fonction displayCart(), c'est avec les arguments (cartContent[index], index) au sein d'une boucle. cartContent est un Array d'objets (produits).
      * 
      * @param {Array} product 
      * @param {Integer} index 
+     * @param {Integer} nbArticles 
+     * @param {Integer} totalPrice
      * 
      * @returns void
      */
- buildHTMLArticle: function(product, index) { // product correspond à chaque objet produit
-    // On cible la section, parent des articles produits (section ayant l'id 'cart__items')
+ buildHTMLArticle: function(product, index) { 
+    // Nous ciblons la section parent des articles produits (section ayant l'id 'cart__items')
     const sectionElement = document.getElementById('cart__items');
-
+    //Nous ajoutons les balises utiles et leurs attributs en l'occurence data-id et data-color.
     const articleElement = document.createElement('article');
     articleElement.classList.add('cart__item');
     articleElement.dataset.id = product.id;
     articleElement.dataset.color = product.color;
 
-    // On appelle l'API pour récupérer les infos manquantes du produit cad : image, nom, prix, altTxt
-   cart.getProduct(product.id, index);
+    // Nous appelons l'API pour récupérer les infos manquantes des produits c.a.d : image, nom, prix, altTxt sous forme d'Array et nous les stockons dans le localStorage à la clé correspondante à l'indice. Dans l'appel à l'API ceux sont les id des produits du panier qui sont récupérés auprès de l'API puisque cette fonction est appelée au sein de buildHtmlArticle(CartContent[i], index) et au sein d'une boucle.
+    cart.getProduct(product.id, index);
 
-    // On récupère les données du produit que l'on avait mises dans le localStorage : image, nom, prix, altTxt
+    // Nous récupérons les données manquantes des produits que nous avions mises dans le localStorage: image, nom, prix, altTxt sous forme de string.
     const productFieldsKey = index.toString();
     const productFields = localStorage.getItem(productFieldsKey);
-    console.log(productFields);
+    //console.log(productFields);
 
-    // On split la string pour tout avoir dans un array
+    // Nous utilisons la fonction split pour scinder la string récupérée du localStorage et avoir chaque donnée séparée par une virgule dans un array productFieldsArray.
     const productFieldsArray = productFields.split(',');
-    console.log(productFieldsArray);
+    //console.log(productFieldsArray);
     
-    
-//On affiche les informations du panier en rattachant tous les éléments au DOM et avec les valeurs dynamiques
-//Pour la première partie :    
-    //<section id="cart__items">
-    //     <!--  <article class="cart__item" data-id="{product-ID}" data-color="{product-color}">
-//ok//        <div class="cart__item__img">
-    //          <img src="../images/product01.jpg" alt="Photographie d'un canapé">
-    //        </div>
+    //Nous affichons dynamiquement les données récupérées correspondantes aux produits du panier via le DOM. Nous rattachons les éléments à la balise <article> créée plus haut.
     let parentImageElement = document.createElement("div");
     parentImageElement.classList.add("cart__item__img");
     
@@ -94,12 +94,7 @@ const cart = {
     articleElement.appendChild(parentImageElement);
     parentImageElement.appendChild(articleImage);
 
-    //        <div class="cart__item__content">
-    //          <div class="cart__item__content__description">
-    //            <h2>Nom du produit</h2>
-    //            <p>Vert</p>
-    //            <p>42,00 €</p>
-    //          </div>
+    
     let grandParentDescriptionElement = document.createElement("div");
     grandParentDescriptionElement.classList.add("cart__item__content");
     articleElement.appendChild(grandParentDescriptionElement);
@@ -120,11 +115,7 @@ const cart = {
     articlePrice.innerText = productFieldsArray[2];
     parentDescriptionElement.appendChild(articlePrice);
 
-    //       <div class="cart__item__content__settings">
-    //         <div class="cart__item__content__settings__quantity">
-    //            <p>Qté : </p>
-    //            <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="42">
-    //         </div>
+    
     let grandParentQuantityElement = document.createElement("div");
     grandParentQuantityElement.classList.add("cart__item__content__settings");
     grandParentDescriptionElement.appendChild(grandParentQuantityElement);
@@ -146,13 +137,7 @@ const cart = {
     quantityInputElement.setAttribute("value", product.quantity);
     parentQuantityItem.appendChild(quantityInputElement);
 
-    //         <div class="cart__item__content__settings__delete">
-    //            <p class="deleteItem">Supprimer</p>
-    //         </div>
-    //       </div>
-    //     </div>
-    //   </article> -->
-    // </section>
+    
     let parentDeleteElement = document.createElement("div");
     parentDeleteElement.className = "cart__item__content__settings__delete";
     grandParentQuantityElement.appendChild(parentDeleteElement);
@@ -162,22 +147,21 @@ const cart = {
     deleteItem.innerText = "Supprimer";
     parentDeleteElement.appendChild(deleteItem);
     
-    // On ajoute l'article en tant qu'enfant de la section
+
     sectionElement.appendChild(articleElement);
 
-    // Pour chaque produit, on va stocker la quantité totale d'articles et le prix
-    cart.nbArticles += parseInt(product.quantity); // par sécurité, on parse les quantités pour être sûr de travailler avec des entiers
+    // Nous incrémentons la quantité de chaque article du articles que nous avions récupérés du panier
+    cart.nbArticles += parseInt(product.quantity); 
     // console.log(cart.nbArticles);
+    // puis nous incrémentons leurs prix
     cart.totalPrice += parseInt(product.quantity * productFieldsArray[2]);
     //console.log(cart.totalPrice);
 
-    // Dernier point de l'étape 8 : afficher le nb d'articles total et le prix total
+    // Dernier point de l'étape 8 : nous affichons le nb d'articles total ainsi que le prix total
     cart.displayTotal(cart.nbArticles, cart.totalPrice);
-    // Nb d'articles = somme des product.quantity
-    // Prix total = pour chaque produit : product.quantity x productFieldsArray[2](= price)
 },
     /**
-     * Récupère un produit à partir de son id
+     * Nous récupérons de l'API un produit à partir de son id 
      * @param {String} idProduct
      * @param {Integer} index
      * 
@@ -190,21 +174,22 @@ const cart = {
                 return response.json();
             })
             .then(function(objectProduct) {
-                console.log(objectProduct);
-                const productFields = [objectProduct.imageUrl, objectProduct.name, objectProduct.price, objectProduct.altTxt];//création d'un tableau contenant une liste image, nom, prix, altTxt.
-                console.log(productFields);
-                // On stocke les données dans le localStorage pour l'utiliser dans la construction du panier
+                //console.log(objectProduct);
+                //Nous créons un tableau contenant une liste : image, nom, prix, altTxt.
+                const productFields = [objectProduct.imageUrl, objectProduct.name, objectProduct.price, objectProduct.altTxt];
+                //console.log(productFields);
+                //Nous sauvegardons ces données dans le local storage à une clé égale à l'indice 
                 const productFieldsKey = index.toString();
-                console.log(productFieldsKey);
-                localStorage.setItem(productFieldsKey, productFields);//sauvegarde dans le local storage à un clé commençant par 0, puis 1, puis 2 
+                //console.log(productFieldsKey);
+                localStorage.setItem(productFieldsKey, productFields);
                 return objectProduct;
             });
         }
     },
     /**
-     * 
-     * @param {Integer} nbArticles 
-     * @param {Integer} totalPrice 
+     * Nous affichons via le DOM la quantité de chaque article et le prix total de tous les articles
+     * @param {Number} nbArticles 
+     * @param {Number} totalPrice 
      */
     displayTotal: function(nbArticles, totalPrice) {
         // On récupère les éléments prévus pour afficher les totaux
@@ -219,12 +204,6 @@ const cart = {
 
     // ETAPE 9 : on doit mettre un écouteur d'événement sur le lien "Supprimer"
     // L'écouteur doit réagir au clic sur le lien et supprimer l'article du produit concerné
-
-    /**
-     * 
-     * @param {Event} event 
-     * @return void
-     */
     handleDeleteLink: function(event) {
         // On récupère le lien cliqué
         const currentElement = event.currentTarget;
@@ -274,7 +253,7 @@ const cart = {
 
     /**
      * Récupère le panier via le localStorage
-     * @returns Array
+     * @returns JSON
      */
     getCart: function() {
         let cart = localStorage.getItem('cart');
@@ -301,13 +280,13 @@ const cart = {
      */
     removeArticleById: function(array, id) {
         // On cherche l'article via son indice avec la méthode findIndex()
-        const requiredIndex = array.findIndex(element => { //findIndex
+        const requiredIndex = array.findIndex(element => {
             // Si l'article est trouvé, on retourne l'id (sous forme de string)
            return element.id === String(id);
         });
 
         // Si l'indice n'est pas trouvé, on retourne false
-        if (requiredIndex === -1) { //si pas trouvé : retourne -1, c'est lié à la fonction native
+        if (requiredIndex === -1) {
            return false;
         };
         // Si l'indice n'est pas trouvé, on supprime l'article correspondant à l'indice et on retourne l'array obtenu
@@ -356,10 +335,225 @@ const cart = {
         // On rafraichit la page
         window.location.reload();
     },
+
+    /**
+     * ETAPE 10 : Ecouteur d'événement qui réagit au click sur le submit du formulaire de commande
+     * (bouton "Commander")
+     * Récupère les données utilisateur puis appelle des fonctions dédiés à vérifier le format des données
+     * Si tout est conforme, alors constitue un objet contact et un array de produits
+     */
+    handleOrder: function(e) {
+        // On ajoute un preventDefault pour empêcher le formulaire de propager son comportement normal (aucune action n'est définie dans le form, et comme on ne doit pas toucher aux fichiers HTML/CSS, nous ferons une redirection vers la page de confirmation à la fin de ce traitement)
+        e.preventDefault();
+        
+        // On doit vérifier que les données saisies correspondent à ce qui est attendu
+        // On va découper ca en fonctions dédiées
+        
+        // Bonus : On vérifie d'abord que le panier n'est pas vide
+        const cartRetrieved = localStorage.getItem('cart');
+        // console.log(cartRetrieved);
+        // Si le panier est vide, alors on affiche un message le signifiant
+        // if (cartRetrieved == undefined || cartRetrieved.length) {
+        //     alert('Votre panier est vide, vous ne pouvez pas encore passer de commande');
+        // }
+
+        // On récupère les valeurs des champs
+        const firstname = document.getElementById('firstName').value;
+        const lastname = document.getElementById('lastName').value;
+        const address = document.getElementById('address').value;
+        const city = document.getElementById('city').value;
+        const email = document.getElementById('email').value;
+
+        // On appelle chaque fonction verify
+        const isFirstnameOk = cart.verifyFirstname(firstname);
+        const isLastnameOk = cart.verifyLastname(lastname);
+        const isCityOk = cart.verifyCity(city);
+        const isAddressOk = cart.verifyAddress(address);
+        const isEmailOk = cart.verifyEmail(email);
+
+        // Si tout est OK, alors on peut constituer un objet contact et un array de produits (à partir du cart)
+        if (isFirstnameOk && isLastnameOk && isCityOk && isAddressOk && isEmailOk) {
+
+            // On créé l'objet contact composé des champs utilisateur
+            const contact = {
+                'firstName' : firstname,
+                'lastName' : lastname,
+                'address' : address,
+                'city' : city,
+                'email' : email
+            };
+            // console.log(contact);
+
+            // On créé un array de produits
+            const cartParse = JSON.parse(cartRetrieved);
+            // console.log(cartParse);
+            arrayProducts = [];
+
+            for (const product of cartParse) {
+                // console.log(product['id']);
+                arrayProducts.push(product['id']);
+            }
+
+            // ETAPE 11 : On envoie les données à l'API en POST
+            cart.postData(contact, arrayProducts);
+        }
+    },
+
+    /**
+     * Vérifie si la string passée en paramètre n'est constituée que de lettres (majuscules et minuscules)
+     * On impose un minimum de 2 caractères et un maximum de 30
+     * @param {String} string
+     * @returns boolean
+     */
+     verifyFirstname: function(string) {
+        // Regex qui donne le format attendu pour l'email
+        const stringFormat = /^[a-zA-Z ]{2,30}$/;
+
+        const errorMessage = document.getElementById('firstNameErrorMsg');
+
+        // Si la string matche le format de la regex, alors on retourne true
+        if (string.match(stringFormat)) {
+            // On supprime l'éventuel contenu du message d'erreur avant de retourner true
+            errorMessage.textContent = '';
+            return true;
+        } else {
+            // On affiche un message d'erreur
+            errorMessage.textContent = 'Merci de renseigner un prénom valide (constitué uniquement de lettres, avec un minimum de 2 caractères et un maximum de 30)';
+            return false;
+        }
+    },
+
+    /**
+     * Vérifie si la string passée en paramètre n'est constituée que de lettres (majuscules et minuscules)
+     * On impose un minimum de 2 caractères et un maximum de 30
+     * @param {String} string
+     * @returns boolean
+     */
+     verifyLastname: function(string) {
+        // Regex qui donne le format attendu pour l'email
+        const stringFormat = /^[a-zA-Z ]{2,30}$/;
+
+        const errorMessage = document.getElementById('lastNameErrorMsg');
+
+        // Si la string matche le format de la regex, alors on retourne true
+        if (string.match(stringFormat)) {
+            // On supprime l'éventuel contenu du message d'erreur avant de retourner true
+            errorMessage.textContent = '';
+            return true;
+        } else {
+            // On affiche un message d'erreur
+            errorMessage.textContent = 'Merci de renseigner un nom valide (constitué uniquement de lettres, avec un minimum de 2 caractères et un maximum de 30)';
+            return false;
+        }
+    },
+
+     /**
+     * Vérifie si la string passée en paramètre n'est constituée que de caractères alphanumériques
+     * * On impose un minimum de 5 caractères et un maximum de 50
+     * @param {String} string
+     * @returns boolean
+     */
+      verifyAddress: function(string) {
+        // Regex qui donne le format attendu pour l'email
+        const addressFormat = /^[A-Za-z0-9'\.\-\s\,]{5,50}$/;
+
+        const errorMessage = document.getElementById('addressErrorMsg');
+
+        // Si la string matche le format de la regex, alors on retourne true
+        if (string.match(addressFormat)) {
+            // On supprime l'éventuel contenu du message d'erreur avant de retourner true
+            errorMessage.textContent = '';
+            return true;
+        } else {
+            // On affiche un message d'erreur
+            errorMessage.textContent = 'Merci de renseigner une adresse valide (constituée uniquement de lettres, avec un minimum de 5 caractères et un maximum de 50)';
+            return false;
+        }
+    },
+
+    /**
+     * Vérifie si la string passée en paramètre n'est constituée que de lettres (majuscules et minuscules)
+     * On impose un minimum de 2 caractères et un maximum de 30
+     * @param {String} string
+     * @returns boolean
+     */
+     verifyCity: function(string) {
+        // Regex qui donne le format attendu pour l'email
+        const stringFormat = /^[a-zA-Z ]{2,30}$/;
+
+        const errorMessage = document.getElementById('cityErrorMsg');
+
+        // Si la string matche le format de la regex, alors on retourne true
+        if (string.match(stringFormat)) {
+            // On supprime l'éventuel contenu du message d'erreur avant de retourner true
+            errorMessage.textContent = '';
+            return true;
+        } else {
+            // On affiche un message d'erreur
+            errorMessage.textContent = 'Merci de renseigner une ville valide (constituée uniquement de lettres, avec un minimum de 2 caractères et un maximum de 30)';
+            return false;
+        }
+    },
+
+    /**
+     * Vérifie si la string passée en paramètre est de la forme d'un email (cad alphanumérique avec un '@' suivi d'un nom de domaine puis d'un point et 2 ou 3 caractères)
+     * @param {String} string
+     * @returns boolean
+     */
+     verifyEmail: function(string) {
+        // Regex qui donne le format attendu pour l'email
+        const emailFormat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+
+        const errorMessage = document.getElementById('emailErrorMsg');
+
+        // Si la string matche le format de la regex, alors on retourne true
+        if (string.match(emailFormat)) {
+            // On supprime l'éventuel contenu du message d'erreur avant de retourner true
+            errorMessage.textContent = '';
+            return true;
+        } else {
+            // On affiche un message d'erreur
+            errorMessage.textContent = 'Merci de renseigner un email valide';
+            return false;
+        }
+    },
+
+    /**
+     * Envoi une requête POST à l'API pour récupérer le numéro de commande
+     * @param {Object} objectContact 
+     * @param {Array} arrayProducts 
+     */
+    postData: function(objectContact, arrayProducts) {
+        // On valide l'existence des champs avant d'envoyer le POST
+        if (objectContact !== undefined && arrayProducts !== undefined) {
+            // Options de configuration du fetch (POST)
+            const PostFetchOptions = {
+            method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+              },
+            body: JSON.stringify({contact: objectContact, products: arrayProducts}) // On ajoute dans le body de la requête les 2 données attendues par l'API
+            };
+
+            // Requête POST au endpoint order de l'API
+            fetch(cart.apiUrl + 'order', PostFetchOptions)
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(result) {
+                // console.log(result.orderId);
+                // On redirige l'utilisateur vers la page de confirmation en ajoutant l'orderId en paramètre GET de l'url
+                window.location.href = '../html/confirmation.html?' + result.orderId;
+                return result;
+            });
+        }
+    }
 };
 
 
-// Ecouteur d'événement pour appeler displayCart() une fois la page chargée
+// Ecouteur d'événement pour appeler displayCart() une fois la page chargée et afficher les articles du panier de manière dynamique
 document.addEventListener('DOMContentLoaded', cart.displayCart);
 
 // On ajoute un écouteur d'événement qui réagit au clic sur les liens "Supprimer"
@@ -379,4 +573,8 @@ document.addEventListener('DOMContentLoaded', function() {
     for (let itemQuantity of itemQuantityElements) {
         itemQuantity.addEventListener('change', cart.handleModifyQuantity);
     }
+
+    // On ajoute un écouteur d'événements qui réagit au submit du formulaire (bouton "Commander !")
+    const submitButton = document.querySelector('#order');
+    submitButton.addEventListener('click', cart.handleOrder);
 });
