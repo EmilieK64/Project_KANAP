@@ -48,22 +48,15 @@ const cart = {
             h1Element.textContent = 'Votre panier est vide';
         }
     },
-/**
+    /**
      * 
      * @param {Array} product 
      * @param {Integer} index 
-     * @param {Integer} nbArticles 
-     * @param {Integer} totalPrice
      * 
      * @returns void
      */
  buildHTMLArticle: function(product, index) { // product correspond à chaque objet produit
     // On cible la section, parent des articles produits (section ayant l'id 'cart__items')
-    // Hotfix pour débugguer l'insertion (non voulue) d'un produit "vide"
-    if (product.color == '') {
-        return;
-    }
-
     const sectionElement = document.getElementById('cart__items');
 
     const articleElement = document.createElement('article');
@@ -208,7 +201,11 @@ const cart = {
             });
         }
     },
-
+    /**
+     * 
+     * @param {Integer} nbArticles 
+     * @param {Integer} totalPrice 
+     */
     displayTotal: function(nbArticles, totalPrice) {
         // On récupère les éléments prévus pour afficher les totaux
         // cad ceux ayant les id totalQuantity et totalPrice
@@ -222,6 +219,12 @@ const cart = {
 
     // ETAPE 9 : on doit mettre un écouteur d'événement sur le lien "Supprimer"
     // L'écouteur doit réagir au clic sur le lien et supprimer l'article du produit concerné
+
+    /**
+     * 
+     * @param {Event} event 
+     * @return void
+     */
     handleDeleteLink: function(event) {
         // On récupère le lien cliqué
         const currentElement = event.currentTarget;
@@ -271,7 +274,7 @@ const cart = {
 
     /**
      * Récupère le panier via le localStorage
-     * @returns JSON
+     * @returns Array
      */
     getCart: function() {
         let cart = localStorage.getItem('cart');
@@ -298,13 +301,13 @@ const cart = {
      */
     removeArticleById: function(array, id) {
         // On cherche l'article via son indice avec la méthode findIndex()
-        const requiredIndex = array.findIndex(element => {
+        const requiredIndex = array.findIndex(element => { //findIndex
             // Si l'article est trouvé, on retourne l'id (sous forme de string)
            return element.id === String(id);
         });
 
         // Si l'indice n'est pas trouvé, on retourne false
-        if (requiredIndex === -1) {
+        if (requiredIndex === -1) { //si pas trouvé : retourne -1, c'est lié à la fonction native
            return false;
         };
         // Si l'indice n'est pas trouvé, on supprime l'article correspondant à l'indice et on retourne l'array obtenu

@@ -1,92 +1,69 @@
-// Sur la page produit à ce stade, il manque les informations du produit. La seule information que l'on ait sur la page sur le produit spécifique est son id qui est dans l'url. 
 
-// On crée un module "product" qui contient des propriétés (variables du module) et des méthodes (=fonctions).
 const product = {
     // url de l'API
     apiUrl: 'http://localhost:3000/api/products/',
 
-    // Options de configuration du fetch sous forme d'objet.
+    // Options de configuration du fetch (sous forme d'objet).
     fetchOptions : {
         method: 'GET',
-        mode: 'cors', //échange interdomaines
+        mode: 'cors', 
         cache: 'no-cache'
     },
-    
     /**
-     * 
-     * @returns Array | JSON
+     * Récupère le contenu du panier à la clé "cart" et le transforme en valeur array javascript
+     * @returns {Array} cart
      */
     getCart: function() {
-        // localStorage.getItem permet de récupérer une donnée stockée en lien avec la clé 'cart' du local storage.
         let cart = localStorage.getItem('cart');
         //console.log(cart);
         if (cart == null) {
             return [];
         } else {
             // console.log(cart);
-            //tu transformes l'info avec "parse" qui analyse une chaîne JSON, en construisant la valeur ou l'objet JavaScript décrit par la chaîne. En effet dans le local storage seul une string est stockée.
             return JSON.parse(cart);
         }
     },
     /**
-     * 
-     * @param {*} cart 
+     * Sauvegarde du panier dans le localStorage à la clé "Cart"
+     * @param {Array} cart
+     * @return void
      */
-    //Le localstorage est une fonctionnalité des navigateurs permettant de stocker et récupérer une chaîne de caractères, sur un navigateur avec Javascript. A la différence d'une simple variable, l'information est persistante entre les pages d'un même site et entre les différentes visites d'un utilisateur.
     saveCart: function(cart) {
-        // tu rajoutes l'information donnée en json sous forme de string dans le local storage avec la clé "cart": set item signifie rajouter ou modifier une valeur qui a une clé donnée en 1er paramètre 
         localStorage.setItem('cart', JSON.stringify(cart));
+        //console.log(cart);
     },
-    /**
-     * 
-     * @returns 
-     */
-    // On stocke les informations nécessaires (id, quantité et couleur du produit) dans le local storage sous la forme d'un array "cart"
-    getProduct: function() {
-        // On commence par stocker l'id de l'URL dans idProduct
-        // Au lieu d'utiliser ici URLSearchParams, on utilise la propriété "split" pour récupérer tout ce qui est après la string 'id=' (on stocke ça dans idProduct)
-        // [1] sert à préciser que l'on souhaite récupérer l'information après 'id=' dans l'Url et non avant
-        const idProduct = window.location.href.split('id=')[1];
-        
-        // On récupère l'élément ayant l'id "colors" et on accède à sa valeur
-        // On stocke la couleur de l'option sélectionnée dans la variable color
-        const color = document.querySelector('#colors').value;
-        
-        // On stocke la quantité choisie dans la variable "quantity"
-        const quantity = document.querySelector('#quantity').value;
 
-        // On crée un objet product qui reprend les informations qui viennent d'être stockées dans les variables  id, color et quantity
+    /**
+     * Création d'un objet comprenant l'id, la couleur et la quantité du produit sélectionné par l'utilisateur
+     * @returns {Object} product
+     */
+    getProduct: function() {
+        const idProduct = window.location.href.split('id=')[1];
+        const color = document.querySelector('#colors').value;
+        const quantity = document.querySelector('#quantity').value;
         const product = {
             'id' : idProduct,
             'color': color,
             'quantity': quantity
         };
-        
         return product;
     },
     /**
-     * 
+     * Insérer le produit et ses détails dans la page Produit
      */
     displayOneProduct: function() {
-        // ETAPE 5 : Récupérer l'id du produit avec URLSearchParams
-        //la variable "URLSearchParams" récupère l'url de la page, cela passe par la création d'une instance de l'objet que l'on nomme "urlData" pour stocker l'url de la page. 
+        // ETAPE 5 : Récupérer l'id du produit avec URLSearchParams  
         let urlData = new URLSearchParams(document.location.search); 
-        // récupérer avec ensuite la méthode .get l'information de l'id. 
-        // On stocke la valeur du paramètre id de l'URL ainsi récupérée dans la variable "idProduct"
         let idProduct = urlData.get("id");
         //console.log(idProduct);
-
-        // ce qui permet dans la méthode GET de concaténer à l'url la valeur de l'id récupérée plus haut pour ensuite récupérer les informations sous forme d'objet : 
         fetch(product.apiUrl + idProduct, product.fetchOptions)
         .then(function(response) {
             return response.json();
         })
-        //objectProduct contient le résultat de response.json. Ce que l'on a reçu et qui a été traité en json sera appelé objectProduct. On aurait pu écrire .then((objectProduct) => {
         .then(function(objectProduct) {
-        // ETAPE 6 : Insérer un produit et ses détails dans la page Produit
+        // ETAPE 6 : Insérer le produit et ses détails dans la page Produit
             //console.log(objectProduct);
-            //console.log((typeof(objectProduct))); // on voit ainsi qu'il s'agit d'un objet.
-            //Récupération et affichage des informations contenues dans l'objet objectProduct           
+            //console.log((typeof(objectProduct))); 
             let imageInfo = document.querySelector(".item__img");
             let imageElement = document.createElement("img");
             imageElement.src = objectProduct.imageUrl;
@@ -104,18 +81,13 @@ const product = {
             
             let colorOption = document.querySelector("#colors");
 
-            // On boucle sur l'array colors (récupéré de l'API car nous voyons sur http://localhost:3000/API/products/a557292fe5814ea2b15c6ef4bd73ed83 qu'il s'agit d'un array) pour créer pour chaque valeur de l'array une balise <option value="color">color</option> 
-            for (const color of objectProduct.colors) { // pour chacune des lignes/valeur que l'on nomme "color" dans l'array "colors" dans l'API : on crée une balise <option> dans le DOM qu'on stocke dans une variable "optionElement" :
+            for (const color of objectProduct.colors) { 
                 const optionElement = document.createElement("option");
-                // On ajoute à chaque balise <option> l'attribue "value" auquel on affecte la valeur de chaque ligne de l'array nommée "color"
                 optionElement.value = color; 
-                // on attribue cette valeur au "textcontent" de chacune des balises <option> pour que les couleurs s'affichent
                 optionElement.textContent = color; 
-                // On ajoute ces balises <option> créées au parent <select> avec .appendChild
                 colorOption.appendChild(optionElement);
             }
         })
-        // sinon dans le cas d'une erreur intègre dans le contenu de la balise avec la class item un h1 au contenu de erreur 404 et renvoie en console l'erreur. On aurait pu écrire aussi .catch((err) => {
         .catch(function(err) { 
             const errorElement = document.querySelector(".item");
             errorElement.innerText = "Erreur 404";
@@ -124,76 +96,39 @@ const product = {
         },
 
      /**
-     * ETAPE 7 : Doit stocker dans local storage 3 infos : id, quantité et couleur du produit sous la forme d'un array cart au click sur le bouton "ajouter au panier" du formulaire
-     
-    // Cette fonction addToCart()s'exécute lorsque l'on clique sur le bouton "Ajouter au panier" (via un écouteur d'événement plus bas).   
-    // la fonction addToCart va faire appel à 3 fonctions codées plus haut : getProduct(), getcart() et saveCart() qui vont donc chacune s'exécuter au moment où l'on clique sur le bouton.
-    Cette fonction doit stocker dans local storage 3 infos : id, quantité et couleur du produit sous la forme d'un array cart. 
-    L'ajout d'un produit au panier est conditionnel (si le produit existe déjà, alors on doit incrémenter sa quantité, cf. spécifications). 
-    Pour savoir si le produit à ajouter au panier y est déjà, on récupère le "nouveau" produit à ajouter au panier via la fonction getProduct() qui retourne l'id, la quantité et la couleur sous la forme d'un objet "product".
-    On récupère ensuite le contenu du panier via la fonction getCart().  On peut alors comparer le contenu du panier avec le nouveau produit à ajouter. On ajoute ce produit si et seulement s'il n'existe pas dans le panier (cad en regardant son id ET sa couleur).  
-    Une fois le produit ajouté (ou sa quantité incrémentée sinon), on sauvegarde le panier via la fonction saveCart().  
-    saveCart() utilise le localStorage pour stocker le panier dans une variable appellée 'cart'.
-        /**
-         * 
-         */
+     * ETAPE 7 : Stocker dans local storage 3 infos : id, quantité et couleur du produit dans un array "cart" au click sur le bouton "ajouter au panier" du formulaire. L'ajout d'un produit au panier est conditionnel : si le produit existe déjà (id + couleur), alors on incrémente sa quantité seulement. 
+     * 
+     */
       addToCart: function() {
-        // On doit comparer le produit à ajouter avec le contenu existant du panier 
-
-        // On récupère le nouveau produit à ajouter : le résultat de la fonction getProduct() définie plus haut est stocké dans la variable new Product qui est un objet avec les informations de l'id, quantité et couleur.
         const newProduct = product.getProduct();
         //console.log(newProduct);
-
-        // On récupère le contenu du panier : le résultat de la fonction getcart est stockée dans la variable cartContent qui est un array.
         const cartContent = product.getCart();
         //console.log(cartContent);
-
-        // On utilise la fonction native JS find() pour savoir si le même produit est déjà dans le panier
-        // chercher dans le panier cartContent si nous trouvons un produit p dont l'id correspond à l'id du nouveau produit à rajouter
-        // Si find() trouve le produit, alors il va le retourner
-        // Sinon, find() retourne "undefined"
         const foundProductById = cartContent.find(p => p.id == newProduct.id);
-        // console.log(foundProductById);
-
+        //console.log(foundProductById);
         if (foundProductById != undefined) {
-            // On a trouvé un produit id correspondant
-            // On vérifie maintenant si la couleur correspond aussi au produit à ajouter
             const foundProductByColor = cartContent.find(p => p.color == newProduct.color);
             //console.log(foundProductByColor);
-
-            // Si le panier contient bien un produit p dont la couleur maintenant correspond à la couleur du nouveau produit à rajouter (n'est pas undefined) 
-            // Si on a donc trouvé un produit correspondant exactement (id + couleur) 
             if (foundProductByColor != undefined) {
                 //console.log("foundProductByColor ok");
-                //=> on met à jour la quantité
-                // Pour pouvoir tenir compte de la quantité réellement saisie par l'utilisateur, on convertit les valeurs des quantités en entier (fonction parseInt)
-                //transformer en entier la quantité de l'article similaire en couleur trouvé dans le panier.
                 let productQuantity = parseInt(foundProductByColor.quantity);
-                // On incrément la quantité du nouveau produit à ajouter  à la quantité du produit dans le panier (ayant donc le même id et couleur)
                 productQuantity += parseInt(newProduct.quantity);
-                //Cette nouvelle quantité devient donc la nouvelle quantité dans le panier pour le produit ayant le même id et la même couleur 
                 foundProductByColor.quantity = productQuantity;
             } else {
-                // On ne trouve pas de produit avec le même id et la même couleur => on l'ajoute au panier
                 cartContent.push(newProduct);
             }
         } else {
-            // On ne trouve pas de produit correspondant dans le panier => on l'ajoute au panier
             cartContent.push(newProduct);
         }
-        // On vérifie que la quantité et la couleur ne sont pas nulles et que la quantité ne peut pas être supérieure à 100
         if (document.querySelector('#quantity').value !=0 && document.querySelector('#quantity').value <101 && document.querySelector('#colors').value !='') {
-            // On stocke le panier dans le localStorage
-            product.saveCart(cartContent);
+            product.saveCart(cartContent);//mise à jour du local storage 
             alert('Produit ajouté au panier !');
-            //console.log(product.getCart());
         } else {
             alert('Veuillez indiquer à la fois une quantité entre 0 et 100 et une couleur');
         }
     }
 };
 
-// Ecouteur d'événement pour appeler displayOneProduct() au chargement de la page
 document.addEventListener('DOMContentLoaded', product.displayOneProduct);
 
 // On ajoute un écouteur d'événements qui réagit au bouton "Ajouter au panier" 

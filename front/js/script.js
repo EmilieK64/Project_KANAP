@@ -1,8 +1,10 @@
-// Script JS pour afficher tous les produits retournés par l'API
+// Script JS pour afficher tous les produits retournés par l'API (Etape 3) et faire le lien entre la page accueil et la page produit (début de l'étape 4):
 
-//ETAPE 3 : Insérer les produits dans la page d'accueil
+//ETAPE 3 : Insérer les produits dans la page d'accueil : 
 
-// Appel de l'API pour récupérer et afficher tous les produits disponibles : méthode GET*/
+/**
+ * Appel de l'API pour récupérer et afficher tous les produits disponibles : avec la méthode GET puis avec l'appel de la fonction définie plus bas "displayAllProducts(products)";
+ */
 fetch("http://localhost:3000/api/products")
 .then(function(response) {
   return response.json();
@@ -16,21 +18,20 @@ fetch("http://localhost:3000/api/products")
 })
 .then (function(products) {
   displayAllProducts(products);
-  console.table(products);
+  //console.table(products);
 });
 
-
 /**
- * Fonction d'affichage des produits de l'API sur la page index, appelée plus haut
+ * Fonction d'insertion des produits de l'API dans le DOM de manière dynamique et donc d'affichage des produits sur la page index et qui permet également de faire le lien entre la page accueil et la page produit
  * 
  * @param {Array} products 
+ * @return void
  */
 function displayAllProducts(products) { 
+  // grâce à une boucle pour parcourir la réponse :
   for (let i in products) {
-
     const allProductsDisplay = document.querySelector(".items"); 
-
-    //Etape 4 : faire le lien entre la page d'accueil et la page produit. 
+    //Début de l'Etape 4 : faire le lien entre la page d'accueil et la page produit : paramétrage de la balise “a” et son attribut “href 
     const OneProductLinkDisplay = document.createElement("a");
     OneProductLinkDisplay.href += "./product.html?id=" + products[i]._id;
   
