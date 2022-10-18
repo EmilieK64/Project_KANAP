@@ -13,12 +13,14 @@ const cart = {
         cache: 'no-cache'
     },
 
-    // Nous initialisons le nb total d'articles et le prix total à afficher sur la page panier : variables utilisées dans la fonction "buildHtmlArticle(product, index).
+    // Nous initialisons le nb total d'articles et le prix total à afficher sur la page panier : variables utilisées dans la fonction "buildHtmlArticle(product, index) et displayTotal((nbArticles, totalPrice) appelée par la première.
     nbArticles: 0,
     totalPrice: 0,
 
     /**
-     * Etape 8 : nous affichons le contenu du panier via l'insersion des produits récupérés du localStorage dans le DOM.
+     * Etape 8 : _nous récupérons les produits du panier issus du localStorage
+     *           _nous affichons dans le DOM le contenu du panier via l'insertion des produits du panier récupérés du localStorage et l'insertion des données complémentaires aux produits récupérées via l'API avec la fonction buildHtmlArticle appelées avec ses arguments : (cartContent[index], index).
+     *           _nous affichons également les totaux avec la fonction buildHtmlArticle appelée. 
      */
     displayCart: function() {
         // Nous raffraichissons le contenu du panier de la page "cart" alors que celle-ci est ouverte  
@@ -36,7 +38,7 @@ const cart = {
         // Si le panier contient au moins 1 produit, nous réalisons le traitement pour son affichage
         if (cartRetrieved !== '[]') {
             const cartContent = JSON.parse(cartRetrieved);
-            // Nous parcourons le panier (Array)
+            // Nous parcourons le panier (Array) qui contient les objets avec les propriétés id, couleur, quantité
             // for (const product of cartContent) { possible aussi
             for (let index = 0; index < cartContent.length; index++) { 
                 //Nous appelons la fonction ci-dessous qui va afficher dynamiquement via le DOM les données récupérées.
@@ -50,10 +52,11 @@ const cart = {
     },
 
     /**
-     * Suite de l'étape 8
-     * Nous insérons les informations sur les produits issues du panier : via le DOM et les affichons.
-     * Nous rajoutons les informations manquantes qui ne sont pas dans le panier en faisant une requête auprès de l'API.
-     * Lorsque la fonction est appelée par la fonction displayCart(), c'est avec les arguments (cartContent[index], index) au sein d'une boucle. cartContent est un Array d'objets (produits).
+     * Partie de l'étape 8 :
+     * Nous affichons dans le DOM les informations sur les produits issues du panier récupérées en amont dans la fonction displayCart().
+     * Nous rajoutons à l'affichage les informations manquantes sur ces produits qui ne sont pas dans le panier mais qui sont fournies par l'API avec notamment la fonction getProduct(product.id, index) appelée qui stocke ces informations dans le local storage. Ainsi nous pouvons les récupérer pour l'affichage.
+     * Lorsque cette fonction buildHtmlArticle est appelée, elle a les arguments (cartContent[index], index). Une boucle permet donc de parcourir les produits du panier pour les afficher mais aussi les id des produits du paniers pour s'en servir pour appeler l'API dans la fonction getProduct(product.id, index).
+     * La boucle permet également de parcourir les quantités et prix des produits du panier pour les incrémenter et les afficher ensuite via l'appel à la fonction cart.displayTotal et ses arguments (cart.nbArticles, cart.totalPrice).
      * 
      * @param {Array} product 
      * @param {Integer} index 
@@ -63,18 +66,18 @@ const cart = {
      * @returns void
      */
  buildHTMLArticle: function(product, index) { 
-    // Nous ciblons la section parent des articles produits (section ayant l'id 'cart__items')
+    // Nous ciblons la section parent des articles produits.
     const sectionElement = document.getElementById('cart__items');
-    //Nous ajoutons les balises utiles et leurs attributs en l'occurence data-id et data-color.
+    //Nous ajoutons les balises utiles en commençant par la balise <article> et ses attributs en l'occurence data-id et data-color.
     const articleElement = document.createElement('article');
     articleElement.classList.add('cart__item');
     articleElement.dataset.id = product.id;
     articleElement.dataset.color = product.color;
 
-    // Nous appelons l'API pour récupérer les infos manquantes des produits c.a.d : image, nom, prix, altTxt sous forme d'Array et nous les stockons dans le localStorage à la clé correspondante à l'indice. Dans l'appel à l'API ceux sont les id des produits du panier qui sont récupérés auprès de l'API puisque cette fonction est appelée au sein de buildHtmlArticle(CartContent[i], index) et au sein d'une boucle.
+    // Nous appelons l'API pour récupérer les infos manquantes des produits du panier, c.a.d : image, nom, prix, altTxt et nous les stockons dans le localStorage à la clé correspondante à l'index. 
     cart.getProduct(product.id, index);
 
-    // Nous récupérons les données manquantes des produits que nous avions mises dans le localStorage: image, nom, prix, altTxt sous forme de string.
+    // Nous récupérons ces données manquantes du localStorage.
     const productFieldsKey = index.toString();
     const productFields = localStorage.getItem(productFieldsKey);
     //console.log(productFields);
@@ -83,7 +86,7 @@ const cart = {
     const productFieldsArray = productFields.split(',');
     //console.log(productFieldsArray);
     
-    //Nous affichons dynamiquement les données récupérées correspondantes aux produits du panier via le DOM. Nous rattachons les éléments à la balise <article> créée plus haut.
+    //Nous affichons dynamiquement toutes les données récupérées pour chaque produit du panier dans le DOM. Nous rattachons les éléments à la balise <article> créée plus haut, elle même rattachée à la balise parente ayant l'id cart__items'.
     let parentImageElement = document.createElement("div");
     parentImageElement.classList.add("cart__item__img");
     
@@ -112,7 +115,7 @@ const cart = {
     parentDescriptionElement.appendChild(articleColor);
 
     let articlePrice = document.createElement("p");
-    articlePrice.innerText = productFieldsArray[2];
+    articlePrice.innerText = productFieldsArray[2] + " €";
     parentDescriptionElement.appendChild(articlePrice);
 
     
@@ -150,10 +153,10 @@ const cart = {
 
     sectionElement.appendChild(articleElement);
 
-    // Nous incrémentons la quantité de chaque article du articles que nous avions récupérés du panier
+    // Nous incrémentons la quantité de chaque article (que nous avions récupérée du panier)
     cart.nbArticles += parseInt(product.quantity); 
     // console.log(cart.nbArticles);
-    // puis nous incrémentons leurs prix
+    // puis nous incrémentons les prix via ce calcul
     cart.totalPrice += parseInt(product.quantity * productFieldsArray[2]);
     //console.log(cart.totalPrice);
 
@@ -161,7 +164,7 @@ const cart = {
     cart.displayTotal(cart.nbArticles, cart.totalPrice);
 },
     /**
-     * Nous récupérons de l'API un produit à partir de son id 
+     * Nous récupérons de l'API les données d'un produit à partir de son id que nous stockons dans le local storage à la clé index
      * @param {String} idProduct
      * @param {Integer} index
      * 
@@ -178,7 +181,7 @@ const cart = {
                 //Nous créons un tableau contenant une liste : image, nom, prix, altTxt.
                 const productFields = [objectProduct.imageUrl, objectProduct.name, objectProduct.price, objectProduct.altTxt];
                 //console.log(productFields);
-                //Nous sauvegardons ces données dans le local storage à une clé égale à l'indice 
+                //Nous sauvegardons ces données sous forme de string dans le local storage à une clé égale à l'indice 
                 const productFieldsKey = index.toString();
                 //console.log(productFieldsKey);
                 localStorage.setItem(productFieldsKey, productFields);
@@ -187,17 +190,16 @@ const cart = {
         }
     },
     /**
-     * Nous affichons via le DOM la quantité de chaque article et le prix total de tous les articles
+     * Nous affichons via le DOM les totaux : quantité d'articles et prix total
      * @param {Number} nbArticles 
      * @param {Number} totalPrice 
      */
     displayTotal: function(nbArticles, totalPrice) {
-        // On récupère les éléments prévus pour afficher les totaux
-        // cad ceux ayant les id totalQuantity et totalPrice
+        // Nous récupérons les éléments dans le DOM prévus pour afficher les totaux : quantité d'articles et prix total
         const totalQuantityElement = document.getElementById('totalQuantity');
         const totalPriceElement = document.getElementById('totalPrice');
 
-        // On leur assigne les bonnes valeurs
+        // Nous leur assignons les bonnes valeurs
         totalQuantityElement.textContent = nbArticles;
         totalPriceElement.textContent = totalPrice;
     },
@@ -252,7 +254,7 @@ const cart = {
     },
 
     /**
-     * Récupère le panier via le localStorage
+     * Nous récupérons le panier du localStorage
      * @returns JSON
      */
     getCart: function() {
@@ -265,7 +267,7 @@ const cart = {
     },
 
     /**
-     * Enregistre le panier dans le localStorage
+     * Nous enregistrons le panier dans le localStorage
      * @param {Object} cart 
      */
     saveCart: function(cart) {
