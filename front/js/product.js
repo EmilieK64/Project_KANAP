@@ -100,7 +100,7 @@ const product = {
         },
 
      /**
-     * ETAPE 7 : Nous ajoutons au panier le produit, sa quantité et sa couleur sélectionnés par l'utilisateur sur la page produit. L'ajout d'un produit au panier est conditionnel : si le produit existe déjà dans le panier (id + couleur), alors on incrémente sa quantité seulement. Nous sauvegardons enfin le panier ainsi modifié dans le local storage.
+     * ETAPE 7 : Nous ajoutons au panier le produit, sa quantité et sa couleur sélectionnés par l'utilisateur sur la page Produit. L'ajout d'un produit au panier est conditionnel : si le produit existe déjà dans le panier (id + couleur), alors nous incrémentons sa quantité seulement à la quantité du produit déjà existant dans le panier. Nous sauvegardons enfin le panier ainsi modifié dans le local storage.
      * 
      */
       addToCart: function() {
@@ -109,7 +109,7 @@ const product = {
         //console.log(newProduct);
         // Nous récupérons ce qui a été retourné par la fonction getCart(), c.a.d un array vide ou contenant des objets avec les données : id, couleur et quantité des produits du panier.
         const cartContent = product.getCart();
-        //console.log(cartContent);
+        // console.log(cartContent);
         //Nous utilisons la fonction native JS find() pour savoir si le nouveau produit est déjà dans le panier (même id).
         const foundProductById = cartContent.find(p => p.id == newProduct.id);
         //console.log(foundProductById);

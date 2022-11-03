@@ -18,8 +18,8 @@ const cart = {
     totalPrice: 0,
 
     /**
-     * Etape 8 : _nous récupérons les produits du panier issus du localStorage
-     *           _nous affichons dans le DOM le contenu du panier via l'insertion des produits du panier récupérés du localStorage et l'insertion des données complémentaires aux produits récupérées via l'API avec la fonction buildHtmlArticle appelées avec ses arguments : (cartContent[index], index).
+     * Etape 8 : _nous raffraichissons la page et nous récupérons les produits du panier issus du localStorage
+     *           _nous affichons dans le DOM le contenu du panier via l'insertion des produits du panier récupérés du localStorage et l'insertion des données complémentaires aux produits du panier récupérées via l'API : avec la fonction buildHtmlArticle appelées avec ces arguments : (cartContent[index], index).
      *           _nous affichons également les totaux avec la fonction buildHtmlArticle appelée. 
      */
     displayCart: function() {
@@ -27,7 +27,7 @@ const cart = {
         if (!localStorage.getItem("firstLoad")) {  
             setTimeout(() => {
                 window.location.reload();
-            }, '100');
+            }, '1');
             localStorage.setItem("firstLoad", true); 
         } else {
             localStorage.removeItem("firstLoad"); 
@@ -55,7 +55,7 @@ const cart = {
      * Partie de l'étape 8 :
      * Nous affichons dans le DOM les informations sur les produits issues du panier récupérées en amont dans la fonction displayCart().
      * Nous rajoutons à l'affichage les informations manquantes sur ces produits qui ne sont pas dans le panier mais qui sont fournies par l'API avec notamment la fonction getProduct(product.id, index) appelée qui stocke ces informations dans le local storage. Ainsi nous pouvons les récupérer pour l'affichage.
-     * Lorsque notre fonction buildHtmlArticle est appelée, elle a les arguments (cartContent[index], index) et une boucle définie en amont permet de parcourir les produits du panier pour les afficher mais aussi les id des produits du paniers pour s'en servir pour appeler l'API dans la fonction getProduct(product.id, index).
+     * Lorsque la fonction buildHtmlArticle est appelée, elle a les arguments (cartContent[index], index) et une boucle définie en amont permet de parcourir les produits du panier pour les afficher mais aussi les id des produits du paniers pour s'en servir pour appeler l'API dans la fonction getProduct(product.id, index).
      * La boucle permet également de parcourir les quantités et prix des produits du panier pour les incrémenter et les afficher ensuite via l'appel à la fonction cart.displayTotal et ses arguments (cart.nbArticles, cart.totalPrice).
      * 
      * @param {Array} product 
@@ -80,11 +80,11 @@ const cart = {
         // Nous récupérons ces données manquantes du localStorage.
         const productFieldsKey = index.toString();
         const productFields = localStorage.getItem(productFieldsKey);
-        //console.log(productFields);
+        // console.log(productFields);
 
         // Nous utilisons la fonction split pour scinder la string récupérée du localStorage et avoir chaque donnée séparée par une virgule dans un array productFieldsArray.
         const productFieldsArray = productFields.split(',');
-        //console.log(productFieldsArray);
+        // console.log(productFieldsArray);
         
         //Nous affichons dynamiquement toutes les données récupérées pour chaque produit du panier dans le DOM. Nous rattachons les éléments à la balise <article> créée plus haut, elle même rattachée à la balise parente ayant l'id cart__items'.
         let parentImageElement = document.createElement("div");
@@ -154,21 +154,20 @@ const cart = {
         sectionElement.appendChild(articleElement);
 
         // Nous incrémentons la quantité de chaque article (que nous avions récupérée du panier)
+        //console.log((typeof((product.quantity))));
         cart.nbArticles += parseInt(product.quantity); 
-        // console.log(cart.nbArticles);
+        //console.log(cart.nbArticles);
         // puis nous incrémentons les prix via ce calcul
         cart.totalPrice += parseInt(product.quantity * productFieldsArray[2]);
         //console.log(cart.totalPrice);
-
         // Dernier point de l'étape 8 : nous affichons le nb d'articles total ainsi que le prix total
         cart.displayTotal(cart.nbArticles, cart.totalPrice);
     },
     /**
-     * Nous récupérons de l'API les données d'un produit à partir de son id que nous stockons dans le local storage à la clé index
+     * Nous récupérons de l'API les données d'un produit à partir de son id, nous ciblons certaines données que nous stockons dans le local storage à la clé index
      * @param {String} idProduct
      * @param {Integer} index
      * 
-     * @returns {JSON} 
      */
     getProduct: function(idProduct, index) {
         if (idProduct) {
@@ -185,7 +184,6 @@ const cart = {
                 const productFieldsKey = index.toString();
                 //console.log(productFieldsKey);
                 localStorage.setItem(productFieldsKey, productFields);
-                return objectProduct;
             });
         }
     },
@@ -198,30 +196,30 @@ const cart = {
         // Nous récupérons les éléments dans le DOM prévus pour afficher les totaux : quantité d'articles et prix total
         const totalQuantityElement = document.getElementById('totalQuantity');
         const totalPriceElement = document.getElementById('totalPrice');
-
         // Nous leur assignons les bonnes valeurs
         totalQuantityElement.textContent = nbArticles;
         totalPriceElement.textContent = totalPrice;
     },
-
-    // ETAPE 9 : Nous devons mettre un écouteur d'événement sur le lien "Supprimer"
+    /**
+     * ETAPE 9 : un écouteur d'événement est mis sur les balises p "Supprimer", la fonction handleDeleteLink(event) s'exécute au click. Nous supprimons de l'affichage puis du localStorage le produit.
+     * @param {Event} event 
+     */
     handleDeleteLink: function(event) {
-        // Nous récupérons le lien cliqué
+        // Nous récupérons l'élément sur lequel a été effectué le click
         const currentElement = event.currentTarget;
-        // Nous supprimons de l'affichage puis du panier le produit
-        // Pour cela nous récupérons le produit concerné
-        // NB : il nous faut l'id ET la couleur pour ne pas tout supprimer à tord
+        // Nous ciblons la balise article parente la plus proche de l'élément concerné (balise p supprimer) pour récupérer le produit concerné 
         const articleElement = currentElement.closest('article');
+        // Nous récupérons l'id et la couleur pour un traitement ultérieur : la suppression dans le panier 
         const productId = articleElement.dataset.id;
         // console.log(productId);
         const productColor = articleElement.dataset.color;
         // console.log(productColor);
-        // Nous supprimons du DOM l'article concerné en ciblant la balise article parente la plus proche du lien
+        // Nous supprimons du DOM l'article concerné 
         articleElement.remove();
         // Nous récupérons le contenu du panier
         const cartRetrieved = cart.getCart();
-        // Nous supprimons du panier l'article supprimé
-        // Nous bouclons sur le panier pour trouver l'article supprimé
+        //alert(cartRetrieved);
+        // Nous bouclons sur le panier pour trouver l'article à supprimé
         const foundProductById = cartRetrieved.find(p => p.id == productId);
         // console.log(foundProductById);
         if (foundProductById != undefined) {
@@ -267,26 +265,23 @@ const cart = {
      * @returns mixed Array | String | Bool
      */
     removeArticleById: function(array, id, color) {
-        // Nous cherchons l'article via son indice avec la méthode findIndex()
+        // Nous cherchons l'indice de l'article ayant la couleur la méthode findIndex()
         const requiredIndex = array.findIndex(element => {
             // Si l'article est trouvé, nous retournons l'id (sous forme de string)
-            console.log(element);
+            //console.log(element);
            return element.id === String(id) && element.color == color;
         });
         // Si l'indice n'est pas trouvé, nous retournons false
         if (requiredIndex === -1) {
            return false;
         };
-
-        // DEBUG pour voir la valeur contenue dans requiredIndex
-        // alert(requiredIndex);
-
-        // L'id est trouvé, nous supprimons l'article correspondant à l'id et nous retournons l'array obtenu
+        //alert(requiredIndex);
+        // L'indice est trouvé, nous supprimons l'article correspondant à l'indice et nous retournons l'array obtenu
             return array.splice(requiredIndex, 1);
     },
     /**
-     * ETAPE 9 : Nous devons mettre un écouteur d'événement sur les quantités produits
-     * Ecouteur d'événement qui réagit au changement de valeur 
+     * ETAPE 9 : un écouteur d'événement est mis sur les quantités de produits 
+     * Ecouteur d'événement qui réagit au changement de valeur avec change. La fonction modifie alors 
      * @param {Event} event 
      */
     handleModifyQuantity: function(event) {
@@ -294,7 +289,7 @@ const cart = {
         const currentTarget = event.currentTarget;
         //Nous récupérons l'article parent associé
         const articleElement = currentTarget.closest('article');
-        // Nous récupérons l'id et la couleur du produit concerné dans le DOM sur la balise article
+        // Nous récupérons l'id et la couleur du produit concerné dans le DOM sur la balise article pour un traitement ultérieur : modifier la quantité du produit dans le panier
         const productId = articleElement.dataset.id;
         const productColor = articleElement.dataset.color;
 
@@ -318,14 +313,14 @@ const cart = {
             // On ne trouve pas de produit correspondant dans le panier => on affiche une erreur dans la console
             console.error('Le produit à mettre à jour n\'est pas dans le panier');
         }
-        // On stocke le panier dans le localStorage
+        // Nous stockons le panier dans le localStorage
         cart.saveCart(cartRetrieved);
-        // On rafraichit la page
-        window.location.reload();
+        // Nous rafraichissons la page.
+        cart.displayCart();
     },
 
     /**
-     * ETAPE 10 : Au click sur le  bouton "commander" du formulaire nous récupérons les données utilisateur puis appelons des fonctions dédiées pour vérifier le format des données.
+     * ETAPE 10 : Au click sur le  bouton "commander" du formulaire de commande nous récupérons les données utilisateur puis appelons des fonctions dédiées pour vérifier le format des données.
      * Si tout est conforme, nous constituons un objet contact et un array de produits
      * @param {Event} e 
      */
@@ -380,6 +375,9 @@ const cart = {
                 // product est un array associatif : on accède à la valeur de son id via sa clé 'id'
                 // dans un array associatif, les clés sont des string (contrairement aux array numérotés où les clés sont des indices commencant par 0)
                 arrayProducts.push(product['id']);
+                //alert(arrayProducts);
+                //alert(product['id']);
+                alert(product);
             }
 
             // ETAPE 11 : On envoie les données à l'API en POST
@@ -542,9 +540,15 @@ const cart = {
 
 
 // Ecouteur d'événement pour appeler displayCart() une fois la page chargée et afficher les articles du panier de manière dynamique
-document.addEventListener('DOMContentLoaded', cart.displayCart);
+const totalQuantityElement = document.getElementById('totalQuantity');
+const totalPriceElement = document.getElementById('totalPrice');
+// Nous leur assignons les bonnes valeurs
+totalQuantityElement.textContent = 0;
+totalPriceElement.textContent = 0;
 
-// Nous ajoutons un écouteur d'événement qui réagit au clic sur les liens "Supprimer"
+document.addEventListener('DOMContentLoaded', cart.displayCart);
+// Nous ajoutons un écouteur d'événement qui réagit au clic sur les balises p "Supprimer"
+
 document.addEventListener('DOMContentLoaded', function() {
     // Nous ciblons les éléments ayant la classe deleteItem
     const deleteLinks = document.getElementsByClassName('deleteItem');
