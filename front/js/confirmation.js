@@ -12,7 +12,6 @@ const confirmation = {
         // Pour finir, nous récupérons l'élément dans lequel insérer l'orderId et nous le mettons
         const orderIdElement = document.getElementById('orderId');
         orderIdElement.textContent = orderId;
-
     }
 };
 

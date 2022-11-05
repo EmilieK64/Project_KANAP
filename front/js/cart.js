@@ -80,7 +80,7 @@ const cart = {
         // Nous récupérons ces données manquantes du localStorage.
         const productFieldsKey = index.toString();
         const productFields = localStorage.getItem(productFieldsKey);
-        // console.log(productFields);
+        console.log(productFields);
 
         // Nous utilisons la fonction split pour scinder la string récupérée du localStorage et avoir chaque donnée séparée par une virgule dans un array productFieldsArray.
         const productFieldsArray = productFields.split(',');
@@ -241,7 +241,7 @@ const cart = {
 
     /**
      * Nous récupérons le panier du localStorage
-     * @returns JSON
+     * @returns Array
      */
     getCart: function() {
         let cart = localStorage.getItem('cart');
@@ -251,6 +251,7 @@ const cart = {
             return JSON.parse(cart);
         }
     },
+    
     /**
      * Nous enregistrons le panier dans le localStorage
      * @param {Object} cart 
@@ -262,10 +263,10 @@ const cart = {
      * Nous supprimons du panier un article correspondant au produit supprimé
      * @param {Array} array 
      * @param {String} id 
-     * @returns mixed Array | String | Bool
+     * @returns mixed Array | String | Boolean
      */
     removeArticleById: function(array, id, color) {
-        // Nous cherchons l'indice de l'article ayant la couleur la méthode findIndex()
+        // Nous cherchons l'indice de l'article ayant la couleur et l'id du produit avec la méthode findIndex()
         const requiredIndex = array.findIndex(element => {
             // Si l'article est trouvé, nous retournons l'id (sous forme de string)
             //console.log(element);
@@ -367,17 +368,17 @@ const cart = {
 
             // Nous créons un array de produits
             const cartParse = JSON.parse(cartRetrieved);
-            // console.log(cartParse);
+            alert(cartParse);
             arrayProducts = [];
-
+            
+            // Nous bouclons sur cartParse pour récupérer la valeur de l'id de chaque produit
             for (const product of cartParse) {
                 // console.log(product['id']);
-                // product est un array associatif : on accède à la valeur de son id via sa clé 'id'
-                // dans un array associatif, les clés sont des string (contrairement aux array numérotés où les clés sont des indices commencant par 0)
+                // Nous ajoutons chaque id à l'array arrayProducts
                 arrayProducts.push(product['id']);
-                //alert(arrayProducts);
-                //alert(product['id']);
-                alert(product);
+                // alert(arrayProducts);
+                // alert(product['id']);
+                // alert(product);
             }
 
             // ETAPE 11 : On envoie les données à l'API en POST
@@ -435,7 +436,7 @@ const cart = {
 
      /**
      * Nous vérifions si la string passée en paramètre n'est constituée que de caractères alphanumériques
-     * * Nous imposons un minimum de 5 caractères et un maximum de 50
+     * Nous imposons un minimum de 5 caractères et un maximum de 50
      * @param {String} string
      * @returns boolean
      */
@@ -508,6 +509,7 @@ const cart = {
      * Nous envoyons une requête POST à l'API pour récupérer le numéro de commande
      * @param {Object} objectContact 
      * @param {Array} arrayProducts 
+     * @returns Object Javascript
      */
     postData: function(objectContact, arrayProducts) {
         // Nous validons l'existence des champs avant d'envoyer le POST
@@ -522,14 +524,14 @@ const cart = {
               },
             body: JSON.stringify({contact: objectContact, products: arrayProducts}) // Nous ajoutons dans le body de la requête les 2 données attendues par l'API
             };
-
             // Requête POST au endpoint order de l'API
             fetch(cart.apiUrl + 'order', PostFetchOptions)
             .then(function(response) {
                 return response.json();
             })
             .then(function(result) {
-                // console.log(result.orderId);
+                //alert((typeof((result))));
+                //alert(result.orderId);
                 // Nous redirigeons l'utilisateur vers la page de confirmation en ajoutant l'orderId en paramètre GET de l'url
                 window.location.href = '../html/confirmation.html?' + result.orderId;
                 return result;
@@ -566,7 +568,7 @@ document.addEventListener('DOMContentLoaded', function() {
         itemQuantity.addEventListener('change', cart.handleModifyQuantity);
     }
 
-    // Nous ajoutons un écouteur d'événements qui réagit au submit du formulaire (bouton "Commander !")
+    // Nous ajoutons un écouteur d'événements qui réagit au click du formulaire (bouton "Commander !")
     const submitButton = document.querySelector('#order');
     submitButton.addEventListener('click', cart.handleOrder);
 });
