@@ -109,7 +109,7 @@ const product = {
         //console.log(newProduct);
         // Nous récupérons ce qui a été retourné par la fonction getCart(), c.a.d un array vide ou contenant des objets avec les données : id, couleur et quantité des produits du panier.
         const cartContent = product.getCart();
-        // console.log(cartContent);
+        //console.log(cartContent);
         //Nous utilisons la fonction native JS find() pour savoir si le nouveau produit est déjà dans le panier (même id).
         const foundProductById = cartContent.find(p => p.id == newProduct.id);
         //console.log(foundProductById);

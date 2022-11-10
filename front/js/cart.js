@@ -245,7 +245,7 @@ const cart = {
 
     /**
      * Nous récupérons le panier du localStorage
-     * @returns JSON
+     * @returns Array
      */
     getCart: function() {
         let cart = localStorage.getItem('cart');
@@ -395,7 +395,7 @@ const cart = {
      * @returns boolean
      */
      verifyFirstname: function(string) {
-        // Regex qui donne le format attendu pour l'email
+        // Regex qui donne le format attendu pour cet onglet
         const stringFormat = /^[a-zA-Z ]{2,30}$/;
 
         const errorMessage = document.getElementById('firstNameErrorMsg');
@@ -419,7 +419,7 @@ const cart = {
      * @returns boolean
      */
      verifyLastname: function(string) {
-        // Regex qui donne le format attendu pour l'email
+        // Regex qui donne le format attendu pour cet onglet
         const stringFormat = /^[a-zA-Z ]{2,30}$/;
 
         const errorMessage = document.getElementById('lastNameErrorMsg');
@@ -443,7 +443,7 @@ const cart = {
      * @returns boolean
      */
       verifyAddress: function(string) {
-        // Regex qui donne le format attendu pour l'email
+        // Regex qui donne le format attendu pour cet onglet
         const addressFormat = /^[A-Za-z0-9'\.\-\s\,]{5,50}$/;
 
         const errorMessage = document.getElementById('addressErrorMsg');
@@ -467,7 +467,7 @@ const cart = {
      * @returns boolean
      */
      verifyCity: function(string) {
-        // Regex qui donne le format attendu pour l'email
+        // Regex qui donne le format attendu pour cet onglet
         const stringFormat = /^[a-zA-Z ]{2,30}$/;
 
         const errorMessage = document.getElementById('cityErrorMsg');
@@ -490,7 +490,7 @@ const cart = {
      * @returns boolean
      */
      verifyEmail: function(string) {
-        // Regex qui donne le format attendu pour l'email
+        // Regex qui donne le format attendu pour l'e-mail
         const emailFormat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
         const errorMessage = document.getElementById('emailErrorMsg');
