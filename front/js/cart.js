@@ -186,14 +186,10 @@ const cart = {
                 const productFieldsKey = index.toString();
                 //console.log(productFieldsKey);
                 localStorage.setItem(productFieldsKey, productFields);
-                return objectProduct.price;
-            })
-            .then(function(product) {
-                return product;
+                return objectProduct;
             });
         }
     },
-
     /**
      * Nous affichons via le DOM les totaux : quantité d'articles et prix total
      * @param {Number} nbArticles 
