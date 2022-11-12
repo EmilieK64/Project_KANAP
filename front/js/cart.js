@@ -75,7 +75,7 @@ const cart = {
         articleElement.dataset.color = product.color;
 
         // Nous appelons l'API pour récupérer les infos manquantes des produits du panier, c.a.d : image, nom, prix, altTxt et nous les stockons dans le localStorage à la clé correspondante à l'index. 
-        let productPrice = cart.getProduct(product.id, index);
+        cart.getProduct(product.id, index);
 
         // Nous récupérons ces données manquantes du localStorage.
         const productFieldsKey = index.toString();
@@ -115,7 +115,7 @@ const cart = {
         parentDescriptionElement.appendChild(articleColor);
 
         let articlePrice = document.createElement("p");
-        articlePrice.innerText = productPrice + " €";
+        articlePrice.innerText = productFieldsArray[2] + " €";
         parentDescriptionElement.appendChild(articlePrice);
 
         
@@ -158,7 +158,7 @@ const cart = {
         cart.nbArticles += parseInt(product.quantity); 
         // console.log(cart.nbArticles);
         // puis nous incrémentons les prix via ce calcul
-        cart.totalPrice += parseInt(product.quantity * productPrice);
+        cart.totalPrice += parseInt(product.quantity * productFieldsArray[2]);
         //console.log(cart.totalPrice);
 
         // Dernier point de l'étape 8 : nous affichons le nb d'articles total ainsi que le prix total
@@ -180,17 +180,20 @@ const cart = {
             .then(function(objectProduct) {
                 //console.log(objectProduct);
                 //Nous créons un tableau contenant une liste : image, nom, prix, altTxt.
-                // const productFields = [objectProduct.imageUrl, objectProduct.name, objectProduct.price, objectProduct.altTxt];
-                const productFields = [objectProduct.imageUrl, objectProduct.name, objectProduct.altTxt];
+                const productFields = [objectProduct.imageUrl, objectProduct.name, objectProduct.price, objectProduct.altTxt];
                 //console.log(productFields);
                 //Nous sauvegardons ces données sous forme de string dans le local storage à une clé égale à l'indice 
                 const productFieldsKey = index.toString();
                 //console.log(productFieldsKey);
                 localStorage.setItem(productFieldsKey, productFields);
                 return objectProduct.price;
+            })
+            .then(function(product) {
+                return product;
             });
         }
     },
+
     /**
      * Nous affichons via le DOM les totaux : quantité d'articles et prix total
      * @param {Number} nbArticles 
