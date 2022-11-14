@@ -138,7 +138,7 @@ const product = {
             //Les informations utiles selon la situation sont données à l'utilisateur.
             alert('Produit ajouté au panier !');
         } else {
-            alert('Veuillez indiquer à la fois une quantité entre 0 et 100 et une couleur');
+            alert('Veuillez indiquer à la fois une quantité entre 1 et 100 et une couleur');
         }
     }
 };
