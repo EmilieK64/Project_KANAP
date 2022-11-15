@@ -36,7 +36,7 @@ const cart = {
         const cartRetrieved = localStorage.getItem("cart");
         //console.log(cartRetrieved);
         // Si le panier contient au moins 1 produit, nous réalisons le traitement pour son affichage
-        if (cartRetrieved !== '[]') {
+        if (cartRetrieved !== '[]' && cartRetrieved !== null) {
             const cartContent = JSON.parse(cartRetrieved);
             // Nous parcourons le panier (Array) qui contient les objets avec les propriétés id, couleur, quantité
             // for (const product of cartContent) { possible aussi
