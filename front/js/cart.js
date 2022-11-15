@@ -34,9 +34,10 @@ const cart = {
         }
         // Nous récupérons le contenu du panier à la clé "cart"
         const cartRetrieved = localStorage.getItem("cart");
-        //console.log(cartRetrieved);
-        // Si le panier contient au moins 1 produit, nous réalisons le traitement pour son affichage
-        if (cartRetrieved !== '[]' && cartRetrieved !== null) {
+        // console.log(cartRetrieved);
+        // console.log(window.localStorage.length);
+        // Si le localStorage contient au moins 1 élément et que le panier contient au moins 1 produit, nous réalisons le traitement pour son affichage
+        if (window.localStorage.length > 0 && cartRetrieved !== '[]' && cartRetrieved !== null) {
             const cartContent = JSON.parse(cartRetrieved);
             // Nous parcourons le panier (Array) qui contient les objets avec les propriétés id, couleur, quantité
             // for (const product of cartContent) { possible aussi
@@ -80,8 +81,12 @@ const cart = {
         // Nous récupérons ces données manquantes du localStorage.
         const productFieldsKey = index.toString();
         const productFields = localStorage.getItem(productFieldsKey);
-        //console.log(productFields);
+        // console.log(productFields);
 
+        // Si on ne récupère pas les champs du localStorage, alors on sort de la fonction
+        if (!productFields) {
+            return;
+        }
         // Nous utilisons la fonction split pour scinder la string récupérée du localStorage et avoir chaque donnée séparée par une virgule dans un array productFieldsArray.
         const productFieldsArray = productFields.split(',');
         //console.log(productFieldsArray);
